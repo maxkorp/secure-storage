@@ -4,7 +4,8 @@
   "description": "",
   "main": "lib/main.js",
   "scripts": {
-    "lint": "eslint lib"
+    "lint": "eslint lib spec/spec.js",
+    "test": "mocha spec/spec.js"
   },
   "author": "Maximiliano Korp <maxkorp@8bytealchemy.com",
   "license": "MIT",
@@ -14,10 +15,14 @@
   },
   "devDependencies": {
     "babel-eslint": "^6.1.2",
+    "chai": "^3.5.0",
+    "chaimel": "^3.0.0",
     "eslint": "^3.3.1",
     "eslint-config-airbnb": "^10.0.1",
     "eslint-plugin-import": "^1.14.0",
     "eslint-plugin-jsx-a11y": "^2.1.0",
-    "eslint-plugin-react": "^6.1.2"
+    "eslint-plugin-react": "^6.1.2",
+    "mocha": "^3.0.2",
+    "uuid": "^2.0.2"
   }
 }
