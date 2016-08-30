@@ -166,7 +166,7 @@ describe(`secure-storage (Using password: ${password})`, () => {
     const filePath = path.join(__dirname, 'tmp', 'secure.enc');
     const algo = Object.keys(algos)[0];
     const ss = secureStorage(filePath, password, algo);
-    Promise.all([
+    return Promise.all([
       ss.setPassword('serv1', 'acct1', 'condo'),
       ss.setPassword('serv1', 'acct2', 'hondo'),
       ss.setPassword('serv2', 'acct1111', 'janefondo')
@@ -179,5 +179,19 @@ describe(`secure-storage (Using password: ${password})`, () => {
         .then(() => ss.getPassword('serv2', 'acct1111'))
         .then((pass) => expect(pass).toEqual('janefondo'))
     );
+  });
+
+  it('can write to a file in a dir that doesn\'t exist', () => {
+    const filePath = path.join(__dirname, 'tmp', 'frmp', 'brmp', 'secure.enc');
+    const algo = Object.keys(algos)[0];
+    const ss = secureStorage(filePath, password, algo);
+    return ss.setPassword('a', 'b', 'c')
+      .then((result) => {
+        expect(result).toBeTrue();
+        return ss.getPassword('a', 'b');
+      })
+      .then((pass) => {
+        expect(pass).toEqual('c');
+      });
   });
 });
