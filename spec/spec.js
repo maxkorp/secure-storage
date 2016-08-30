@@ -68,6 +68,7 @@ describe(`secure-storage (Using password: ${password})`, () => {
     fse.removeSync(path.join(__dirname, 'tmp'));
     fse.ensureDirSync(path.join(__dirname, 'tmp'));
   });
+
   const algos = getValidAlgosForTesting();
   Object.keys(algos).forEach((algo) => {
     const message = algos[algo];
@@ -159,5 +160,24 @@ describe(`secure-storage (Using password: ${password})`, () => {
           });
       });
     });
+  });
+
+  it('can sanely make multiple writes at the same time', () => {
+    const filePath = path.join(__dirname, 'tmp', 'secure.enc');
+    const algo = Object.keys(algos)[0];
+    const ss = secureStorage(filePath, password, algo);
+    Promise.all([
+      ss.setPassword('serv1', 'acct1', 'condo'),
+      ss.setPassword('serv1', 'acct2', 'hondo'),
+      ss.setPassword('serv2', 'acct1111', 'janefondo')
+    ])
+    .then(() =>
+      ss.getPassword('serv1', 'acct1')
+        .then((pass) => expect(pass).toEqual('condo'))
+        .then(() => ss.getPassword('serv1', 'acct2'))
+        .then((pass) => expect(pass).toEqual('hondo'))
+        .then(() => ss.getPassword('serv2', 'acct1111'))
+        .then((pass) => expect(pass).toEqual('janefondo'))
+    );
   });
 });
