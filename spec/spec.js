@@ -51,17 +51,17 @@ const encryptWithOpenSSL = (inputFile, outputFile, algo) => {
 };
 
 // disabled linter for this as another test will use it
-const decryptWithOpenSSL = (inputFile, algo) => { // eslint-disable-line no-unused-vars
-  const cmd = [
-    'openssl',
-    algo,
-    '-e',
-    '-in',
-    inputFile,
-    '-nosalt'
-  ].join(' ');
-  return cp.execSync(cmd);
-};
+// const decryptWithOpenSSL = (inputFile, algo) => { // eslint-disable-line no-unused-vars
+//   const cmd = [
+//     'openssl',
+//     algo,
+//     '-e',
+//     '-in',
+//     inputFile,
+//     '-nosalt'
+//   ].join(' ');
+//   return cp.execSync(cmd);
+// };
 
 describe(`secure-storage (Using password: ${password})`, () => {
   beforeEach(() => {
