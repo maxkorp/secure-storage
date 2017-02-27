@@ -194,4 +194,101 @@ describe(`secure-storage (Using password: ${password})`, () => {
         expect(pass).toEqual('c');
       });
   });
+
+  it('can find a password', () => {
+    const filePath = path.join(__dirname, 'tmp', 'secure.enc');
+    const algo = Object.keys(algos)[0];
+    const ss = secureStorage(filePath, password, algo);
+    return Promise.all([
+      ss.setPassword('serv1', 'acct1', 'condo'),
+      ss.setPassword('serv1', 'acct2', 'hondo'),
+      ss.setPassword('serv2', 'acct1111', 'janefondo')
+    ])
+    .then(() =>
+      ss.findPassword('serv1')
+        .then((pass) => expect(['condo', 'hondo'].includes(pass)).toEqual(true))
+        .then(() => ss.findPassword('serv2'))
+        .then((pass) => expect(['janefondo'].includes(pass)).toEqual(true))
+    );
+  });
+
+  it('gets null when getting a non-existing password', () => {
+    const filePath = path.join(__dirname, 'tmp', 'secure.enc');
+    const algo = Object.keys(algos)[0];
+    const ss = secureStorage(filePath, password, algo);
+    return ss.getPassword('serv1', 'acct1')
+      .then((pass) => expect(pass).toEqual(null));
+  });
+
+  it('gets null when finding a non-existing password', () => {
+    const filePath = path.join(__dirname, 'tmp', 'secure.enc');
+    const algo = Object.keys(algos)[0];
+    const ss = secureStorage(filePath, password, algo);
+    return ss.findPassword('serv1', 'acct1')
+      .then((pass) => expect(pass).toEqual(null));
+  });
+
+  it('can replace an existing password', () => {
+    const filePath = path.join(__dirname, 'tmp', 'secure.enc');
+    const algo = Object.keys(algos)[0];
+    const ss = secureStorage(filePath, password, algo);
+    return ss.setPassword('serv1', 'acct1', 'condo')
+      .then(() => ss.replacePassword('serv1', 'acct1', 'hondo'))
+      .then(() => ss.getPassword('serv1', 'acct1'))
+      .then((pass) => expect(pass).toEqual('hondo'));
+  });
+
+  it('can replace a non-existing password', () => {
+    const filePath = path.join(__dirname, 'tmp', 'secure.enc');
+    const algo = Object.keys(algos)[0];
+    const ss = secureStorage(filePath, password, algo);
+    return ss.setPassword('serv1', 'acct1', 'condo')
+      .then(() => ss.replacePassword('serv1', 'acct2', 'hondo'))
+      .then(() => ss.getPassword('serv1', 'acct1'))
+      .then((pass) => expect(pass).toEqual('condo'))
+      .then(() => ss.getPassword('serv1', 'acct2'))
+      .then((pass) => expect(pass).toEqual('hondo'));
+  });
+
+  it('does not replace an existing password when using setPassword', () => {
+    const filePath = path.join(__dirname, 'tmp', 'secure.enc');
+    const algo = Object.keys(algos)[0];
+    const ss = secureStorage(filePath, password, algo);
+    return ss.setPassword('serv1', 'acct1', 'condo')
+      .then(() => ss.setPassword('serv1', 'acct1', 'hondo'))
+      .then(() => ss.getPassword('serv1', 'acct1'))
+      .then((pass) => expect(pass).toEqual('condo'));
+  });
+
+  it('returns when getting a non existing password', () => {
+    const filePath = path.join(__dirname, 'tmp', 'secure.enc');
+    const algo = Object.keys(algos)[0];
+    const ss = secureStorage(filePath, password, algo);
+    return ss.setPassword('serv1', 'acct1', 'condo')
+      .then(() => ss.getPassword('poyo', 'fundido'))
+      .then((pass) => expect(pass).toEqual(null));
+  });
+
+  it('can delete a password', () => {
+    const filePath = path.join(__dirname, 'tmp', 'secure.enc');
+    const algo = Object.keys(algos)[0];
+    const ss = secureStorage(filePath, password, algo);
+    return ss.setPassword('serv1', 'acct1', 'condo')
+      .then(() => ss.getPassword('serv1', 'acct1'))
+      .then((pass) => expect(pass).toEqual('condo'))
+      .then(() => ss.deletePassword('serv1', 'acct1'))
+      .then((pass) => expect(pass).toEqual('condo'))
+      .then(() => ss.getPassword('serv1', 'acct1'))
+      .then((pass) => expect(pass).toEqual(null))
+      .then(() => ss.deletePassword('serv2', 'cactusAccount'))
+      .then((pass) => expect(pass).toEqual(false));
+  });
+
+  it('can properly guard', () => {
+    const filePath = path.join(__dirname, 'tmp', 'secure.enc');
+    const algo = Object.keys(algos)[0];
+    const ss = secureStorage(filePath, password, algo);
+    return ss.setPassword('serv1', 'acct1')
+      .then((set) => expect(set).toEqual(false));
+  });
 });
